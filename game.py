@@ -27,6 +27,19 @@ game_over = False
 
 clock = pygame.time.Clock()
 
+def detect_collision(player_pos, enemy_pos):
+    p_x = player_pos[0]
+    p_y = player_pos[1]
+
+    e_x = enemy_pos[0]
+    e_y = enemy_pos[1]
+
+    if (e_x >= p_x and e_x < (p_x + player_size)) or (p_x >= e_x and p_x < (e_x + enemy_size)):
+        if (e_y >= p_y and e_y < (p_y + player_size)) or (p_y >= e_y and p_y < (e_y + enemy_size)):
+            return True
+    return False
+
+
 while not game_over:
 
     for event in pygame.event.get():
@@ -49,15 +62,21 @@ while not game_over:
 
     screen.fill(BACKGROUND_COLOR)
 
+    # Update enemy position
     if enemy_pos[1] >= 0 and enemy_pos[1] < HEIGHT:
         enemy_pos[1] += SPEED
     else:
         enemy_pos[0] = random.randint(0, WIDTH - enemy_size)
         enemy_pos[1] = 0
 
+    if detect_collision(player_pos, enemy_pos):
+        print('collision detected')
+        game_over = True
+        break
+
     pygame.draw.rect(screen, BLUE, (enemy_pos[0], enemy_pos[1], enemy_size, enemy_size))
     pygame.draw.rect(screen, RED, (player_pos[0], player_pos[1], player_size, player_size))
 
-    clock.tick(60)
+    clock.tick(30)
 
     pygame.display.update()
