@@ -26,7 +26,7 @@ clock = pygame.time.Clock()
 
 class Entity:
 
-    def __init__(self, uuid, x = 0, y = 0, vx = 0, vy = 0, size = DEFAULT_SIZE, color = (255, 255, 255)):
+    def __init__(self, uuid, x = 0, y = 0, vx = 0, vy = 0, size = 10, color = (255, 255, 255), health = 10):
         self.uuid = uuid
         self.x = x
         self.y = y
@@ -35,24 +35,34 @@ class Entity:
         self.width = size
         self.height = size
         self.color = color
+        self.health = health
 
     def draw(self):
         pygame.draw.rect(screen, self.color, (self.x, self.y, self.width, self.height))
 
     def act(self):
         # logica di azione
+        # metabolismo basale
+        self.__basal_metabolism()
         # movimento
         self.__move()
 
     def log(self):
-        return self.id() + " " + "x: " + str(self.x) + " y: " + str(self.y)
+        return self.id() + ' ' + 'x: ' + str(self.x) + ' y: ' + str(self.y) + 'health: ' + str(self.health)
 
     def id(self):
         return str(self.uuid[0:4])
 
+    def __basal_metabolism(self):
+        self.health -= 0.01
+
     def __move(self):
         self.x = self.x + self.vx
         self.y = self.y + self.vy
+        self.health -= 0.1
+    
+    def __eat(self, amount):
+        self.health += amount
 
 
 entity_list = []
@@ -68,7 +78,8 @@ def init_entities(entity_number = 10):
         vx = random.randint(-1, 1)
         vy = random.randint(-1, 1)
         color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-        e = Entity(id, x, y, vx, vy, size, color)
+        health = random.randint(1, 10)
+        e = Entity(id, x, y, vx, vy, size, color, health)
         entity_list.append(e)
 
 def search_entities(x, y):
@@ -106,12 +117,12 @@ while True:
         #print(e.log())
     
     if show_popup:
-        font = pygame.font.SysFont("monospace", 35)
+        font = pygame.font.SysFont('monospace', 35)
         text = font.render(selected_entity.log(), True, green, blue)
         text_rect = text.get_rect()
         text_rect.center = (400, 300)
         screen.blit(text, text_rect)
 
-    clock.tick(30)
+    clock.tick(5)
 
     pygame.display.update()
