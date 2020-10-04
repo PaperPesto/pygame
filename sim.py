@@ -2,6 +2,7 @@ import pygame
 import sys
 import random
 import math
+import uuid
 
 pygame.init()
 
@@ -15,30 +16,51 @@ BLUE = (0, 0, 255)
 YELLOW = (255,255, 0)
 BACKGROUND_COLOR = (0,0,0)
 
-entity_size = 10
+DEFAULT_SIZE = 10
 
 clock = pygame.time.Clock()
 
 class Entity:
-    x = 0
-    y = 0
 
-    def __init__(self, x, y):
+    def __init__(self, id, x = 0, y = 0, vx = 0, vy = 0, size = DEFAULT_SIZE, color = (255, 255, 255)):
+        self.id = id
         self.x = x
         self.y = y
+        self.vx = vx
+        self.vy = vy
+        self.width = size
+        self.height = size
+        self.color = color
+
+    def draw(self):
+        pygame.draw.rect(screen, self.color, (self.x, self.y, self.width, self.height))
+
+    def act(self):
+        # logica di azione
+        # movimento
+        self.__move()
+
+    def log(self):
+        print(str(self.id) + ' ' + 'x: ' + str(self.x) + ' y: ' + str(self.y))
+
+    def __move(self):
+        self.x = self.x + self.vx
+        self.y = self.y + self.vy
 
 
 entity_list = []
 
 def init_entities(entity_number = 10):
     for i in range(entity_number):
-        x = random.randint(0, WIDTH - entity_size)
-        y = random.randint(0, HEIGHT - entity_size)
-        entity_list.append(Entity(x, y))
-
-def draw_entities(entity_list):
-    for e in entity_list:
-        pygame.draw.rect(screen, RED, (e.x, e.y, 10, 10))
+        size = 10
+        id = str(uuid.uuid4())
+        x = random.randint(0, WIDTH - size)
+        y = random.randint(0, HEIGHT - size)
+        vx = random.randint(-1, 1)
+        vy = random.randint(-1, 1)
+        color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+        e = Entity(id, x, y, vx, vy, size, color)
+        entity_list.append(e)
 
 init_entities()
 
@@ -52,10 +74,12 @@ while True:
 
     screen.fill(BACKGROUND_COLOR)
 
-    #pygame.draw.rect(screen, RED, (0, 0, 10, 10))
-    draw_entities(entity_list)
+    for e in entity_list:
+        e.draw()
+        e.act()
+        e.log()
 
-    clock.tick(30)
+    clock.tick(1)
     #print('hello tick: ' + str(pygame.time.get_ticks()))
 
     pygame.display.update()
