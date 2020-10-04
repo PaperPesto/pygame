@@ -1,6 +1,7 @@
 import pygame
 import sys
 import random
+import math
 
 # doc https://www.youtube.com/watch?v=-8n91btt5d8&ab_channel=KeithGalli
 
@@ -12,6 +13,7 @@ HEIGHT = 600
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 BACKGROUND_COLOR = (0,0,0)
+YELLOW = (255,255, 0)
 
 SPEED = 10
 
@@ -27,7 +29,14 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 game_over = False
 
+score = 0
+
 clock = pygame.time.Clock()
+
+myFont = pygame.font.SysFont("monospace", 35)
+
+def set_level(score):
+    return math.floor(score / 20)*3 + 5
 
 def drop_enemies(enemy_list):
     delay = random.random()
@@ -40,12 +49,14 @@ def draw_enemies(enemy_list):
     for enemy_pos in enemy_list:
         pygame.draw.rect(screen, BLUE, (enemy_pos[0], enemy_pos[1], enemy_size, enemy_size))
 
-def update_enemy_positions(enemy_list):
+def update_enemy_positions(enemy_list, score):
     for idx, enemy_pos in enumerate(enemy_list):
         if enemy_pos[1] >= 0 and enemy_pos[1] < HEIGHT:
             enemy_pos[1] += SPEED
         else:
             enemy_list.pop(idx)
+            score += 1
+    return score
 
 def collision_check(enemy_list, player_pos):
     for enemy_pos in enemy_list:
@@ -90,7 +101,13 @@ while not game_over:
     screen.fill(BACKGROUND_COLOR)
 
     drop_enemies(enemy_list)
-    update_enemy_positions(enemy_list)
+    score = update_enemy_positions(enemy_list, score)
+    SPEED = set_level(score)
+    
+    text = "Score:" + str(score)
+    label = myFont.render(text, 1, YELLOW)
+    screen.blit(label, (WIDTH-200, HEIGHT-40))
+
     if collision_check(enemy_list, player_pos):
         print('collision detected')
         game_over = True
